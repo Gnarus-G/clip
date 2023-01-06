@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::fs::File;
 use std::io::stdin;
 use std::io::Error;
@@ -31,8 +32,7 @@ enum Command {
 fn main() -> std::io::Result<()> {
     let args = Cli::parse();
 
-    let mut clipboard =
-        ClipboardContext::new().or_else(|e| Err(Error::new(ErrorKind::Other, format!("{e}"))))?;
+    let mut clipboard = ClipboardContext::new().or_else(handle_clipboard_error)?;
 
     let mut content = String::new();
 
@@ -40,9 +40,7 @@ fn main() -> std::io::Result<()> {
         Some(Command::READ) => {
             println!(
                 "{}",
-                clipboard
-                    .get_contents()
-                    .or_else(|e| Err(Error::new(ErrorKind::Other, format!("{e}"))))?
+                clipboard.get_contents().or_else(handle_clipboard_error)?
             );
             Ok(())
         }
@@ -58,7 +56,11 @@ fn main() -> std::io::Result<()> {
 
             clipboard
                 .set_contents(content)
-                .or_else(|e| Err(Error::new(ErrorKind::Other, format!("{e}"))))
+                .or_else(handle_clipboard_error)
         }
     };
+}
+
+fn handle_clipboard_error<E: Display, R>(e: E) -> std::io::Result<R> {
+    return Err(Error::new(ErrorKind::Other, format!("{e}")));
 }
