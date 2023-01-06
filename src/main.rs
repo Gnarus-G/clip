@@ -54,6 +54,10 @@ fn main() -> std::io::Result<()> {
                 }
             }
 
+            // Remove the extra new line the reader above applied,
+            // while retaining the legitimate newlines from the buffer.
+            content = content.lines().collect::<Vec<&str>>().join("\n");
+
             clipboard
                 .set_contents(content)
                 .or_else(handle_clipboard_error)
